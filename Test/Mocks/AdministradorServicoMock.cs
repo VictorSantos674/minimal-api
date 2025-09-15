@@ -30,7 +30,6 @@ public class AdministradorServicoMock : IAdministradorServico
     {
         administrador.Id = administradores.Count() + 1;
         administradores.Add(administrador);
-
         return administrador;
     }
 
@@ -42,5 +41,26 @@ public class AdministradorServicoMock : IAdministradorServico
     public List<Administrador> Todos(int? pagina)
     {
         return administradores;
+    }
+
+    public void Atualizar(Administrador administrador)
+    {
+        var existente = administradores.Find(a => a.Id == administrador.Id);
+        if (existente != null)
+        {
+            existente.Email = administrador.Email;
+            if (!string.IsNullOrEmpty(administrador.Senha))
+                existente.Senha = administrador.Senha;
+            existente.Perfil = administrador.Perfil;
+        }
+    }
+
+    public void Apagar(int id)
+    {
+        var adm = administradores.Find(a => a.Id == id);
+        if (adm != null)
+        {
+            administradores.Remove(adm);
+        }
     }
 }

@@ -93,17 +93,20 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
-        app.UseRouting();
+    // Middleware de tratamento global de erros
+    app.UseMiddleware<MinimalApi.Middlewares.ErrorHandlingMiddleware>();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+    app.UseRouting();
 
-        app.UseCors();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
-        app.UseEndpoints(endpoints => {
+    app.UseCors();
+
+    app.UseEndpoints(endpoints => {
 
             #region Home
             endpoints.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home");
@@ -207,6 +210,51 @@ public class Startup
                     Perfil = administrador.Perfil
                 });
                 
+            })
+            .RequireAuthorization()
+            .RequireAuthorization(new AuthorizeAttribute { Roles = "Adm" })
+            .WithTags("Administradores");
+
+            endpoints.MapPut("/administradores/{id}", ([FromRoute] int id, AdministradorDTO administradorDTO, IAdministradorServico administradorServico) => {
+                var administrador = administradorServico.BuscaPorId(id);
+                if(administrador == null) return Results.NotFound();
+
+                var validacao = new ErrosDeValidacao{
+                    Mensagens = new List<string>()
+                };
+                if(string.IsNullOrEmpty(administradorDTO.Email))
+                    validacao.Mensagens.Add("Email não pode ser vazio");
+                if(administradorDTO.Perfil == null)
+                    validacao.Mensagens.Add("Perfil não pode ser vazio");
+                // Senha é opcional no update
+
+                if(validacao.Mensagens.Count > 0)
+                    return Results.BadRequest(validacao);
+
+                administrador.Email = administradorDTO.Email;
+                if (!string.IsNullOrEmpty(administradorDTO.Senha))
+                    administrador.Senha = administradorDTO.Senha;
+                administrador.Perfil = administradorDTO.Perfil.ToString() ?? Perfil.Editor.ToString();
+
+                administradorServico.Atualizar(administrador);
+
+                return Results.Ok(new AdministradorModelView{
+                    Id = administrador.Id,
+                    Email = administrador.Email,
+                    Perfil = administrador.Perfil
+                });
+            })
+            .RequireAuthorization()
+            .RequireAuthorization(new AuthorizeAttribute { Roles = "Adm" })
+            .WithTags("Administradores");
+
+            endpoints.MapDelete("/administradores/{id}", ([FromRoute] int id, IAdministradorServico administradorServico) => {
+                var administrador = administradorServico.BuscaPorId(id);
+                if(administrador == null) return Results.NotFound();
+
+                administradorServico.Apagar(id);
+
+                return Results.NoContent();
             })
             .RequireAuthorization()
             .RequireAuthorization(new AuthorizeAttribute { Roles = "Adm" })
