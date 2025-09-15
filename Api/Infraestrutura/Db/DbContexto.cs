@@ -5,8 +5,14 @@ namespace MinimalApi.Infraestrutura.Db;
 
 public class DbContexto : DbContext
 {
-    private readonly IConfiguration _configuracaoAppSettings;
-    public DbContexto(IConfiguration configuracaoAppSettings)
+
+    private readonly IConfiguration? _configuracaoAppSettings;
+
+    // Construtor para uso em produção e testes (padrão EF Core)
+    public DbContexto(DbContextOptions<DbContexto> options) : base(options) { }
+
+    // Construtor alternativo para uso manual, se necessário
+    internal DbContexto(IConfiguration configuracaoAppSettings)
     {
         _configuracaoAppSettings = configuracaoAppSettings;
     }
