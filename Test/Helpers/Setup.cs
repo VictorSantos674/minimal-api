@@ -20,7 +20,7 @@ public class Setup
 
         Setup.http = Setup.http.WithWebHostBuilder(builder =>
         {
-            builder.UseSetting("https_port", Setup.PORT).UseEnvironment("Testing");
+            builder.UseSetting("https_port", Setup.PORT).UseEnvironment("Development");
             builder.ConfigureServices(services =>
             {
                 services.AddScoped<IAdministradorServico, AdministradorServicoMock>();
