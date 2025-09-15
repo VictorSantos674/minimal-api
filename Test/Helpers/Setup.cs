@@ -35,4 +35,19 @@ public class Setup
     {
         Setup.http.Dispose();
     }
+
+    public static async Task<string> ObterTokenAdmin()
+    {
+        var loginDTO = new MinimalApi.DTOs.LoginDTO
+        {
+            Email = "adm@teste.com",
+            Senha = "123456"
+        };
+        var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(loginDTO), System.Text.Encoding.UTF8, "application/json");
+        var response = await client.PostAsync("/administradores/login", content);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadAsStringAsync();
+        var admLogado = System.Text.Json.JsonSerializer.Deserialize<MinimalApi.Dominio.ModelViews.AdministradorLogado>(result, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        return admLogado?.Token ?? string.Empty;
+    }
 }
