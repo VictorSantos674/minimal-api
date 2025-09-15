@@ -26,7 +26,7 @@ public class DbContexto : DbContext
             new Administrador {
                 Id = 1,
                 Email = "administrador@teste.com",
-                Senha = "123456",
+                Senha = "$2a$11$Q9QwQn6QwQn6QwQn6QwQnOQn6QwQn6QwQn6QwQn6QwQn6QwQn6QW", // hash fictício para '123456'
                 Perfil = "Adm"
              }
         );
